@@ -4,12 +4,21 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
 
+const TEST_GIFS = [
+	'https://media.giphy.com/media/JpG2A9P3dPHXaTYrwu/giphy.gif',
+	'https://media.giphy.com/media/12pJ8OxSWwO86Y/giphy.gif',
+	'https://media.giphy.com/media/h0MTqLyvgG0Ss/giphy.gif',
+	'https://media.giphy.com/media/MFsqcBSoOKPbjtmvWz/giphy.gif',
+  'https://media.giphy.com/media/hAcDHEhZHA2bu/giphy.gif'
+]
 const builder = 'Richard';
 const builder_link = 'https://t.me/t_ninja_dev';
 
 const App = () => {
   // State
   const [walletAddress, setWalletAddress] = useState(null);
+  const [inputValue, setInputValue] = useState('');
+  const [gifList, setGifList] = useState([]);
 
   /*
    * This function holds the logic for deciding if a Phantom Wallet is
@@ -60,6 +69,21 @@ const App = () => {
     }
   };
 
+  const sendGif = async () => {
+    if (inputValue.length > 0) {
+      console.log('Gif link:', inputValue);
+      setGifList(inputValue);
+      setInputValue('');
+    } else {
+      console.log('Empty input. Try again.');
+    }
+  };
+
+  const onInputChange = (event) => {
+    const { value } = event.target;
+    setInputValue(value);
+  };
+
   /*
    * We want to render this UI when the user hasn't connected
    * their wallet to our app yet.
@@ -71,6 +95,33 @@ const App = () => {
     >
       Connect to Wallet
     </button>
+  );
+
+  const renderConnectedContainer = () => (
+    <div className="connected-container">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          sendGif();
+        }}
+      >
+        <input 
+          type="text" 
+          placeholder="Enter gif link!"
+          value={inputValue}
+          onChange={onInputChange}
+         />
+        <button type="submit" className="cta-button submit-gif-button">Submit</button>
+      </form>
+
+      <div className="gif-grid">
+        {gifList.map(gif => (
+          <div className="gif-item" key={gif}>
+            <img src={gif} alt={gif} />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 
   /*
@@ -85,18 +136,31 @@ const App = () => {
     return () => window.removeEventListener('load', onLoad);
   }, []);
 
+  useEffect(() => {
+    if (walletAddress) {
+      console.log('Fetching GIF list...');
+      
+      // Call Solana program here.
+  
+      // Set state
+      setGifList(TEST_GIFS);
+    }
+  }, [walletAddress]);
+
   return (
     <div className="App">
       {/* This was solely added for some styling fanciness */}
 			<div className={walletAddress ? 'authed-container' : 'container'}>
         <div className="header-container">
-          <p className="header">My First GIF Portal in Solana</p>
+          <p className="header">Get your money here.</p>
           <p className="sub-text">
-            View your GIF collection in the metaverse ✨
+            Get your money with solana here. ✨
           </p>
 
           {/* Add the condition to show this only if we don't have a wallet address */}
           {!walletAddress && renderNotConnectedContainer()}
+
+          {walletAddress && renderConnectedContainer()}
         </div>
         <div className="footer-container">
           <a
